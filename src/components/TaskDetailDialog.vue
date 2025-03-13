@@ -55,14 +55,47 @@
         </el-select>
       </el-form-item>
       
-      <!-- 图片URL -->
-      <el-form-item label="图片URL">
-        <div class="flex items-center gap-2">
-          <el-input v-model="taskForm.image" placeholder="请输入图片URL" class="flex-1" />
-          <el-button type="primary" @click="generateRandomImage">随机图片</el-button>
+      <!-- 图片上传 -->
+      <el-form-item label="任务图片">
+        <div class="image-upload-container">
+          <!-- 图片上传区域 -->
+          <el-upload
+            class="image-uploader"
+            :show-file-list="false"
+            :before-upload="beforeImageUpload"
+            :http-request="uploadImage"
+            accept="image/*"
+          >
+            <img v-if="taskForm.image" :src="taskForm.image" class="uploaded-image" />
+            <div v-else class="upload-placeholder">
+              <el-icon class="upload-icon"><Plus /></el-icon>
+              <div class="upload-text">点击上传图片</div>
+            </div>
+          </el-upload>
+          
+          <!-- 上传状态 -->
+          <el-progress 
+            v-if="uploadProgress > 0 && uploadProgress < 100" 
+            :percentage="uploadProgress" 
+            :format="percentageFormat"
+            status="success"
+          />
+          
+          <!-- 操作按钮 -->
+          <div class="image-actions mt-2">
+            <el-button v-if="taskForm.image" size="small" type="danger" @click="removeImage">
+              <el-icon><Delete /></el-icon> 删除图片
+            </el-button>
+            <el-button size="small" type="primary" @click="generateRandomImage">
+              <el-icon><Picture /></el-icon> 随机图片
+            </el-button>
+          </div>
         </div>
-        <div v-if="taskForm.image" class="mt-2">
-          <img :src="taskForm.image" alt="任务图片预览" class="w-full max-h-40 object-cover rounded" />
+        
+        <!-- 图片URL输入 -->
+        <div class="mt-3">
+          <div class="text-sm text-gray-500 mb-1">或者输入图片URL</div>
+          <el-input v-model="taskForm.image" placeholder="请输入图片URL" />
         </div>
       </el-form-item>
     </el-form>
@@ -78,6 +111,9 @@
 
 <script setup lang="ts">
 import { ref, reactive, nextTick, defineProps, defineEmits, watch } from 'vue'
+import { Plus, Delete, Picture } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import type { UploadProps, UploadRequestOptions } from 'element-plus'
 
 // 定义任务类型
 interface Task {
@@ -102,12 +138,31 @@ const emit = defineEmits<{
   (e: 'save', task: Task): void
 }>()
 
-// 对话框可见状态
 const dialogVisible = ref(props.visible)
+const tagInputRef = ref<HTMLInputElement | null>(null)
+const inputTagVisible = ref(false)
+const inputTagValue = ref('')
+const uploadProgress = ref(0)
+
+// 初始化表单数据
+const taskForm = reactive<Task>({
+  id: props.task?.id || Date.now(),
+  title: props.task?.title || '',
+  description: props.task?.description || '',
+  image: props.task?.image || '',
+  tags: [...(props.task?.tags || [])],
+  priority: props.task?.priority || 'medium',
+  height: props.task?.height || 300
+})
 
 // 监听visible属性变化
 watch(() => props.visible, (newVal) => {
   dialogVisible.value = newVal
+})
+
+// 监听dialogVisible变化
+watch(() => dialogVisible.value, (newVal) => {
+  emit('update:visible', newVal)
 })
 
 // 监听task属性变化，更新表单数据
@@ -123,26 +178,21 @@ watch(() => props.task, (newTask) => {
   }
 }, { immediate: true })
 
-// 监听dialogVisible变化，同步回父组件
-watch(dialogVisible, (newVal) => {
-  emit('update:visible', newVal)
-})
+// 关闭对话框
+const handleClose = () => {
+  dialogVisible.value = false
+}
 
-// 任务表单数据
-const taskForm = reactive<Task>({
-  id: props.task?.id || Date.now(),
-  title: props.task?.title || '',
-  description: props.task?.description || '',
-  image: props.task?.image || '',
-  tags: [...(props.task?.tags || [])],
-  priority: props.task?.priority || 'medium',
-  height: props.task?.height || 300
-})
-
-// 标签输入相关
-const inputTagVisible = ref(false)
-const inputTagValue = ref('')
-const tagInputRef = ref<HTMLInputElement | null>(null)
+// 保存任务
+const handleSave = () => {
+  if (!taskForm.title.trim()) {
+    ElMessage.warning('任务标题不能为空')
+    return
+  }
+  
+  emit('save', { ...taskForm })
+  dialogVisible.value = false
+}
 
 // 显示标签输入框
 const showTagInput = () => {
@@ -173,35 +223,102 @@ const handleRemoveTag = (tag: string) => {
   }
 }
 
-// 关闭对话框
-const handleClose = () => {
-  dialogVisible.value = false
-}
-
 // 生成随机图片
 const generateRandomImage = () => {
-  // 随机高度200-350之间
-  const height = Math.floor(Math.random() * 150) + 200
-  // 随机宽度250-350之间
-  const width = Math.floor(Math.random() * 100) + 250
-  // 使用picsum.photos生成随机图片
-  taskForm.image = `https://picsum.photos/${width}/${height}?random=${Date.now()}`
+  const width = 800
+  const height = 600
+  const randomId = Math.floor(Math.random() * 1000)
+  taskForm.image = `https://picsum.photos/id/${randomId}/${width}/${height}`
 }
 
-// 保存任务
-const handleSave = () => {
-  // 随机生成高度，用于瀑布流布局
-  if (!taskForm.height) {
-    taskForm.height = Math.floor(Math.random() * 100) + 280
+// 图片上传前的验证
+const beforeImageUpload: UploadProps['beforeUpload'] = (file) => {
+  // 检查文件类型
+  const isImage = file.type.startsWith('image/')
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件!')
+    return false
   }
   
-  // 如果没有图片，随机生成一张
-  if (!taskForm.image) {
-    generateRandomImage()
+  // 检查文件大小（限制为2MB）
+  const isLt2M = file.size / 1024 / 1024 < 2
+  if (!isLt2M) {
+    ElMessage.error('图片大小不能超过2MB!')
+    return false
   }
   
-  emit('save', { ...taskForm })
-  dialogVisible.value = false
+  return true
+}
+
+// 图片上传处理
+const uploadImage = async (options: UploadRequestOptions) => {
+  const { file } = options
+  if (!file) return
+  
+  try {
+    // 重置上传进度
+    uploadProgress.value = 0
+    
+    // 模拟上传进度
+    const progressInterval = setInterval(() => {
+      if (uploadProgress.value < 90) {
+        uploadProgress.value += 10
+      }
+    }, 300)
+    
+    console.log('准备上传文件:', file.name)
+    console.log('文件类型:', file.type)
+    console.log('文件大小:', file.size)
+    
+    // 调用后端API上传到Vercel Blob
+    const response = await fetch('/api/upload?filename=' + encodeURIComponent(file.name), {
+      method: 'POST',
+      body: file,
+      headers: {
+        'Content-Type': file.type
+      }
+    })
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error || `上传失败，状态码: ${response.status}`)
+    }
+    
+    // 获取上传结果
+    const result = await response.json()
+    
+    // 上传完成
+    clearInterval(progressInterval)
+    uploadProgress.value = 100
+    
+    console.log('上传成功，URL:', result.url)
+    
+    // 设置图片URL
+    taskForm.image = result.url
+    
+    ElMessage.success('图片上传成功')
+    
+    // 3秒后隐藏进度条
+    setTimeout(() => {
+      uploadProgress.value = 0
+    }, 3000)
+    
+  } catch (error) {
+    console.error('上传错误:', error)
+    ElMessage.error('图片上传失败: ' + (error instanceof Error ? error.message : String(error)))
+    uploadProgress.value = 0
+  }
+}
+
+// 删除图片
+const removeImage = () => {
+  taskForm.image = ''
+  ElMessage.success('图片已删除')
+}
+
+// 格式化进度条显示
+const percentageFormat = (percentage: number) => {
+  return percentage === 100 ? '上传完成' : `${percentage}%`
 }
 </script>
 
@@ -209,5 +326,50 @@ const handleSave = () => {
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
+}
+
+.image-upload-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.image-uploader {
+  width: 100px;
+  height: 100px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.uploaded-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.upload-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.upload-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.upload-text {
+  font-size: 12px;
+  color: #909399;
+}
+
+.image-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style> 

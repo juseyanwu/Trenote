@@ -53,7 +53,7 @@
         </div>
         
         <!-- 操作按钮 -->
-        <div class="action-buttons flex gap-2">
+        <div class="action-buttons flex">
           <el-button 
             type="primary" 
             size="small" 

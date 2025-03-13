@@ -1,39 +1,88 @@
-# kanban
+# Kanban 看板应用
 
-This template should help get you started developing with Vue 3 in Vite.
+一个基于Vue 3和Vite的看板应用，支持任务管理、拖拽排序和图片上传功能。
 
-## Recommended IDE Setup
+## 功能特点
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- 任务看板管理
+- 拖拽排序任务
+- 瀑布流布局
+- 图片上传到Vercel Blob存储
+- 响应式设计
 
-## Type Support for `.vue` Imports in TS
+## 开发环境设置
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+### 推荐的IDE设置
 
-## Customize configuration
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (并禁用Vetur)。
 
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
+### 安装依赖
 
 ```sh
 npm install
+# 或
+pnpm install
 ```
 
-### Compile and Hot-Reload for Development
+### 配置环境变量
+
+创建一个`.env`文件，并设置以下环境变量：
+
+```
+BLOB_READ_WRITE_TOKEN=your_blob_read_write_token_here
+```
+
+在Vercel部署时，需要在Vercel控制台中设置相同的环境变量。
+
+### 开发模式
+
+启动前端和API服务器：
 
 ```sh
-npm run dev
+npm run dev:all
+# 或
+pnpm run dev:all
 ```
 
-### Type-Check, Compile and Minify for Production
+或者分别启动：
+
+```sh
+# 前端开发服务器
+npm run dev
+# API服务器
+npm run server
+```
+
+### 构建生产版本
 
 ```sh
 npm run build
+# 或
+pnpm run build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+## 图片上传功能
+
+本应用使用Vercel Blob存储来保存任务图片。在开发环境中，图片上传功能通过本地API服务器处理，在生产环境中，需要在Vercel上配置Blob存储。
+
+### 配置Vercel Blob存储
+
+1. 在Vercel控制台中，选择你的项目
+2. 进入"Storage"选项卡
+3. 选择"Connect Database"按钮
+4. 在"Create New"选项卡下，选择"Blob"
+5. 使用名称"Images"创建一个新的Blob存储
+6. 选择需要包含读写令牌的环境
+7. 创建后，Vercel会自动添加`BLOB_READ_WRITE_TOKEN`环境变量到你的项目
+
+### 本地开发
+
+对于本地开发，你需要从Vercel拉取环境变量：
 
 ```sh
-npm run lint
+vercel env pull
 ```
+
+## 许可证
+
+MIT

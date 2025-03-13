@@ -10,11 +10,20 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "server": "node server.js",
+    "dev:all": "run-p dev server"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
+    "@types/body-parser": "^1.19.5",
+    "@types/express": "^5.0.0",
+    "@vercel/blob": "^0.27.3",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "element-plus": "^2.9.6",
+    "express": "^4.21.2",
     "pinia": "^3.0.1",
     "uuid": "^11.1.0",
     "vue": "^3.5.13",
