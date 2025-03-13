@@ -1,8 +1,18 @@
 <template>
   <div class="task-card bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
     <!-- 卡片图片 -->
-    <div v-if="task.image" :class="`card-image card-image-${task.id}`">
-      <img :src="task.image" :alt="task.title" class="w-full object-cover">
+    <div v-if="task.image" :class="`card-image card-image-${task.id}`" :style="imageContainerStyle">
+      <div v-if="!imageLoaded" class="image-placeholder bg-gray-200 flex items-center justify-center">
+        <el-icon class="text-gray-400 text-xl"><Picture /></el-icon>
+      </div>
+      <img 
+        :src="task.image" 
+        :alt="task.title" 
+        class="w-full object-cover" 
+        @load="onImageLoad" 
+        @error="onImageError"
+        :style="imageLoaded ? '' : 'display: none;'"
+      >
     </div>
     
     <!-- 卡片内容 -->
@@ -70,6 +80,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { Picture, Edit, Delete } from '@element-plus/icons-vue'
 
 // 定义任务类型
 interface Task {
@@ -96,6 +107,30 @@ defineEmits<{
 
 // 图片加载状态
 const imageLoaded = ref(false)
+const imageError = ref(false)
+
+// 计算图片容器样式
+const imageContainerStyle = computed(() => {
+  if (props.task.height) {
+    return {
+      height: `${props.task.height / 2}px`
+    }
+  }
+  return {
+    height: '150px' // 默认高度
+  }
+})
+
+// 图片加载完成事件
+const onImageLoad = () => {
+  imageLoaded.value = true
+}
+
+// 图片加载失败事件
+const onImageError = () => {
+  imageError.value = true
+  imageLoaded.value = true // 即使加载失败也标记为已加载，以便移除占位符
+}
 
 // 计算优先级对应的类型
 const priorityType = computed(() => {
@@ -125,18 +160,12 @@ const priorityText = computed(() => {
   }
 })
 
-// 组件挂载后设置图片高度
+// 组件挂载后预加载图片
 onMounted(() => {
   if (props.task.image) {
     const img = new Image()
-    img.onload = () => {
-      imageLoaded.value = true
-      const imgElement = document.querySelector(`.card-image-${props.task.id} img`) as HTMLImageElement
-      if (imgElement && props.task.height) {
-        // 根据任务的height属性设置图片高度
-        imgElement.style.height = `${props.task.height / 2}px`
-      }
-    }
+    img.onload = onImageLoad
+    img.onerror = onImageError
     img.src = props.task.image
   }
 })
@@ -159,11 +188,24 @@ onMounted(() => {
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
+.card-image {
+  position: relative;
+  overflow: hidden;
+}
+
 .card-image img {
   width: 100%;
   object-fit: cover;
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
+}
+
+.image-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 /* 文本截断 */

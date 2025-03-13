@@ -368,30 +368,83 @@ const arrangeWaterfall = (listIndex: number) => {
   const columnWidth = containerWidth / columnCount
   const columnGap = 12 // 列间距
   
-  // 初始化每列的高度
-  const columnHeights = Array(columnCount).fill(0)
+  // 检查所有图片是否加载完成
+  const checkImagesLoaded = () => {
+    const images = container.querySelectorAll('img')
+    let allLoaded = true
+    
+    // 如果没有图片，直接返回true
+    if (images.length === 0) return true
+    
+    images.forEach(img => {
+      if (!img.complete) {
+        allLoaded = false
+      }
+    })
+    
+    return allLoaded
+  }
   
-  // 为每个卡片分配位置
-  items.forEach((item) => {
-    const cardElement = item as HTMLElement
-    // 找出最短的列
-    const minHeightIndex = columnHeights.indexOf(Math.min(...columnHeights))
+  // 如果图片未加载完成，等待所有图片加载后再布局
+  if (!checkImagesLoaded()) {
+    const images = container.querySelectorAll('img')
+    let loadedCount = 0
     
-    // 计算位置
-    const left = minHeightIndex * columnWidth + (minHeightIndex * columnGap / 2)
-    const top = columnHeights[minHeightIndex]
+    const onImageLoad = () => {
+      loadedCount++
+      if (loadedCount === images.length) {
+        // 所有图片加载完成，执行布局
+        performLayout()
+      }
+    }
     
-    // 设置卡片位置
-    cardElement.style.left = `${left}px`
-    cardElement.style.top = `${top}px`
-    cardElement.style.width = `${columnWidth - columnGap}px`
+    images.forEach(img => {
+      if (img.complete) {
+        loadedCount++
+      } else {
+        img.addEventListener('load', onImageLoad)
+        // 添加错误处理，防止图片加载失败导致布局无法完成
+        img.addEventListener('error', onImageLoad)
+      }
+    })
     
-    // 更新列高度
-    columnHeights[minHeightIndex] += cardElement.clientHeight + 12 // 12px是卡片间的垂直间距
-  })
+    // 如果所有图片已经加载完成，直接执行布局
+    if (loadedCount === images.length) {
+      performLayout()
+    }
+  } else {
+    // 没有图片或所有图片已加载完成，直接执行布局
+    performLayout()
+  }
   
-  // 设置容器高度为最高列的高度
-  container.style.height = `${Math.max(...columnHeights)}px`
+  // 执行瀑布流布局
+  function performLayout() {
+    // 初始化每列的高度
+    const columnHeights = Array(columnCount).fill(0)
+    
+    // 为每个卡片分配位置
+    items.forEach((item) => {
+      const cardElement = item as HTMLElement
+      // 找出最短的列
+      const minHeightIndex = columnHeights.indexOf(Math.min(...columnHeights))
+      
+      // 计算位置
+      const left = minHeightIndex * columnWidth + (minHeightIndex * columnGap / 2)
+      const top = columnHeights[minHeightIndex]
+      
+      // 设置卡片位置
+      cardElement.style.left = `${left}px`
+      cardElement.style.top = `${top}px`
+      cardElement.style.width = `${columnWidth - columnGap}px`
+      
+      // 更新列高度
+      columnHeights[minHeightIndex] += cardElement.clientHeight + 12 // 12px是卡片间的垂直间距
+    })
+    // 设置容器高度为最高列的高度
+    if (container) {
+      container.style.height = `${Math.max(...columnHeights)}px`
+    }
+  }
 }
 
 // 拖拽结束事件处理
