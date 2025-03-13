@@ -17,7 +17,7 @@
         
         <!-- 瀑布流任务卡片容器 -->
         <div class="waterfall-container p-4 max-h-[calc(100vh-180px)] overflow-y-auto">
-          <div class="waterfall-wrapper">
+          <div class="waterfall-wrapper" :id="`waterfall-${listIndex}`">
             <draggable
               :list="list.tasks" 
               :group="{ name: 'tasks', pull: true, put: true }"
@@ -33,6 +33,7 @@
                   :task="element"
                   @edit="editTask(listIndex, index)"
                   @delete="deleteTask(listIndex, index)"
+                  class="waterfall-item"
                 />
               </template>
             </draggable>
@@ -59,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, nextTick, watch } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { Plus, Document } from '@element-plus/icons-vue'
 import TaskCard from '../components/TaskCard.vue'
@@ -329,11 +330,82 @@ const taskLists = ref<TaskList[]>([
   }
 ])
 
+// 监听任务列表变化，重新布局瀑布流
+watch(taskLists, () => {
+  nextTick(() => {
+    taskLists.value.forEach((_, listIndex) => {
+      arrangeWaterfall(listIndex)
+    })
+  })
+}, { deep: true })
+
+// 组件挂载后初始化瀑布流布局
+onMounted(() => {
+  nextTick(() => {
+    taskLists.value.forEach((_, listIndex) => {
+      arrangeWaterfall(listIndex)
+    })
+  })
+})
+
+// 瀑布流布局函数
+const arrangeWaterfall = (listIndex: number) => {
+  const container = document.getElementById(`waterfall-${listIndex}`)
+  if (!container) return
+  
+  const items = container.querySelectorAll('.waterfall-item')
+  if (items.length === 0) return
+  
+  // 重置所有卡片的位置
+  items.forEach((item) => {
+    const cardElement = item as HTMLElement
+    cardElement.style.position = 'absolute'
+    cardElement.style.transition = 'transform 0.3s ease, top 0.3s ease, left 0.3s ease'
+  })
+  
+  const containerWidth = container.clientWidth
+  const columnCount = 2 // 两列
+  const columnWidth = containerWidth / columnCount
+  const columnGap = 12 // 列间距
+  
+  // 初始化每列的高度
+  const columnHeights = Array(columnCount).fill(0)
+  
+  // 为每个卡片分配位置
+  items.forEach((item) => {
+    const cardElement = item as HTMLElement
+    // 找出最短的列
+    const minHeightIndex = columnHeights.indexOf(Math.min(...columnHeights))
+    
+    // 计算位置
+    const left = minHeightIndex * columnWidth + (minHeightIndex * columnGap / 2)
+    const top = columnHeights[minHeightIndex]
+    
+    // 设置卡片位置
+    cardElement.style.left = `${left}px`
+    cardElement.style.top = `${top}px`
+    cardElement.style.width = `${columnWidth - columnGap}px`
+    
+    // 更新列高度
+    columnHeights[minHeightIndex] += cardElement.clientHeight + 12 // 12px是卡片间的垂直间距
+  })
+  
+  // 设置容器高度为最高列的高度
+  container.style.height = `${Math.max(...columnHeights)}px`
+}
+
 // 拖拽结束事件处理
 const onDragEnd = () => {
   ElMessage({
     type: 'success',
     message: '任务已移动'
+  })
+  
+  // 重新布局瀑布流
+  nextTick(() => {
+    taskLists.value.forEach((_, listIndex) => {
+      arrangeWaterfall(listIndex)
+    })
   })
 }
 
@@ -443,16 +515,16 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
 }
 
 .waterfall-wrapper {
-  column-count: 2;
-  column-gap: 12px;
+  position: relative;
+  width: 100%;
+  min-height: 100px;
   padding: 5px;
 }
 
-/* 确保卡片不会被分割到多列 */
-:deep(.task-card) {
-  break-inside: avoid;
-  margin-bottom: 12px;
-  width: 100%;
+/* 瀑布流卡片样式 */
+:deep(.waterfall-item) {
+  position: absolute;
+  transition: transform 0.3s ease, top 0.3s ease, left 0.3s ease;
 }
 
 /* 空列表样式 */
@@ -474,16 +546,13 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
 }
 
 .chosen-card {
-  transform: scale(1.02);
+  transform: scale(1.02) !important;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  z-index: 10;
 }
 
 /* 媒体查询，在小屏幕上显示单列 */
 @media (max-width: 640px) {
-  .waterfall-wrapper {
-    column-count: 1;
-  }
-  
   .kanban-list {
     width: 320px;
     min-width: 320px;
