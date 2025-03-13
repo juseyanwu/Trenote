@@ -26,6 +26,7 @@
               chosen-class="chosen-card"
               animation="300"
               @end="onDragEnd"
+              :class="['min-h-[calc(100vh-250px)]', {'empty-list': list.tasks.length === 0}]"
             >
               <template #item="{ element, index }">
                 <TaskCard 
@@ -60,6 +61,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
+import { Plus, Document } from '@element-plus/icons-vue'
 import TaskCard from '../components/TaskCard.vue'
 import TaskDetailDialog from '../components/TaskDetailDialog.vue'
 import draggable from 'vuedraggable'
@@ -451,6 +453,17 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
   break-inside: avoid;
   margin-bottom: 12px;
   width: 100%;
+}
+
+/* 空列表样式 */
+:deep(.empty-list) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 250px);
+  width: 100%;
+  border-radius: 8px;
 }
 
 /* 拖拽样式 */
