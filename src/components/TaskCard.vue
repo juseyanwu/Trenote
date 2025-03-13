@@ -6,9 +6,9 @@
     </div>
     
     <!-- 卡片内容 -->
-    <div class="card-content p-3">
+    <div class="card-content p-4">
       <!-- 标题 -->
-      <h4 class="text-base font-medium text-gray-800 mb-2 line-clamp-2">{{ task.title }}</h4>
+      <h4 class="text-base font-medium text-gray-800 mb-3 line-clamp-2">{{ task.title }}</h4>
       
       <!-- 描述 -->
       <p v-if="task.description" class="text-sm text-gray-600 mb-3 line-clamp-3">
@@ -29,7 +29,7 @@
       </div>
       
       <!-- 底部操作栏 -->
-      <div class="card-footer flex justify-between items-center mt-2">
+      <div class="card-footer flex justify-between items-center mt-3">
         <!-- 优先级标识 -->
         <div class="priority-indicator">
           <el-tag 
@@ -43,7 +43,7 @@
         </div>
         
         <!-- 操作按钮 -->
-        <div class="action-buttons flex gap-1">
+        <div class="action-buttons flex gap-2">
           <el-button 
             type="primary" 
             size="small" 

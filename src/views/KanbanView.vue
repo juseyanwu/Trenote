@@ -1,6 +1,6 @@
 <template>
   <div class="kanban-container">
-    <div class="flex overflow-x-auto pb-4 pt-2 px-2 gap-6">
+    <div class="flex overflow-x-auto pb-4 pt-2 px-2 gap-8">
       <!-- 任务列表容器 -->
       <div 
         v-for="(list, listIndex) in taskLists" 
@@ -8,15 +8,15 @@
         class="kanban-list bg-gray-100 rounded-lg shadow-md flex-shrink-0"
       >
         <!-- 列表标题 -->
-        <div class="list-header p-3 border-b border-gray-200 flex justify-between items-center">
-          <h3 class="font-semibold text-gray-700">{{ list.title }}</h3>
+        <div class="list-header p-4 border-b border-gray-200 flex justify-between items-center">
+          <h3 class="font-semibold text-gray-700 text-lg">{{ list.title }} <span class="text-sm text-gray-500">({{ list.tasks.length }})</span></h3>
           <el-button type="primary" size="small" circle @click="addTask(listIndex)">
             <el-icon><Plus /></el-icon>
           </el-button>
         </div>
         
         <!-- 瀑布流任务卡片容器 -->
-        <div class="waterfall-container p-3 max-h-[calc(100vh-180px)] overflow-y-auto">
+        <div class="waterfall-container p-4 max-h-[calc(100vh-180px)] overflow-y-auto">
           <div class="waterfall-wrapper">
             <draggable
               :list="list.tasks" 
@@ -40,7 +40,7 @@
       </div>
       
       <!-- 添加新列表按钮 -->
-      <div class="add-list-btn flex-shrink-0" style="width: 320px;">
+      <div class="add-list-btn flex-shrink-0" style="width: 380px;">
         <el-button type="primary" plain class="w-full" @click="addList">
           <el-icon class="mr-2"><Plus /></el-icon>添加新列表
         </el-button>
@@ -429,9 +429,9 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
 .kanban-list {
   display: flex;
   flex-direction: column;
-  width: 320px;
-  min-width: 320px;
-  max-width: 320px;
+  width: 380px;
+  min-width: 380px;
+  max-width: 380px;
   border-radius: 10px;
 }
 
@@ -442,13 +442,14 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
 
 .waterfall-wrapper {
   column-count: 2;
-  column-gap: 10px;
+  column-gap: 12px;
+  padding: 5px;
 }
 
 /* 确保卡片不会被分割到多列 */
 :deep(.task-card) {
   break-inside: avoid;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   width: 100%;
 }
 
@@ -471,9 +472,9 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
   }
   
   .kanban-list {
-    width: 280px;
-    min-width: 280px;
-    max-width: 280px;
+    width: 320px;
+    min-width: 320px;
+    max-width: 320px;
   }
 }
 </style> 
