@@ -110,6 +110,19 @@ watch(() => props.visible, (newVal) => {
   dialogVisible.value = newVal
 })
 
+// 监听task属性变化，更新表单数据
+watch(() => props.task, (newTask) => {
+  if (newTask) {
+    taskForm.id = newTask.id || Date.now()
+    taskForm.title = newTask.title || ''
+    taskForm.description = newTask.description || ''
+    taskForm.image = newTask.image || ''
+    taskForm.tags = [...(newTask.tags || [])]
+    taskForm.priority = newTask.priority || 'medium'
+    taskForm.height = newTask.height || 300
+  }
+}, { immediate: true })
+
 // 监听dialogVisible变化，同步回父组件
 watch(dialogVisible, (newVal) => {
   emit('update:visible', newVal)
