@@ -1,5 +1,21 @@
 <template>
   <div class="kanban-container">
+    <!-- 全局加载状态 -->
+    <div v-if="isLoading" class="global-loading-overlay">
+      <div class="loading-content">
+        <el-icon class="loading-icon"><Loading /></el-icon>
+        <div class="loading-text">正在加载任务列表...</div>
+        
+        <!-- 加载进度条 -->
+        <div class="progress-container">
+          <div class="progress-bar" :style="{ width: `${loadingProgress}%` }"></div>
+        </div>
+        
+        <!-- 加载进度百分比 -->
+        <div class="progress-text">{{ loadingProgress }}%</div>
+      </div>
+    </div>
+    
     <div class="flex overflow-x-auto pb-4 pt-2 px-2 gap-8">
       <!-- 任务列表容器 -->
       <div 
@@ -34,6 +50,7 @@
                   @edit="editTask(listIndex, index)"
                   @delete="deleteTask(listIndex, index)"
                   class="waterfall-item"
+                  @image-loaded="onTaskImageLoaded"
                 />
               </template>
             </draggable>
@@ -60,9 +77,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, watch } from 'vue'
+import { ref, onMounted, nextTick, watch, computed } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import { Plus, Document } from '@element-plus/icons-vue'
+import { Plus, Document, Loading } from '@element-plus/icons-vue'
 import TaskCard from '../components/TaskCard.vue'
 import TaskDetailDialog from '../components/TaskDetailDialog.vue'
 import draggable from 'vuedraggable'
@@ -83,6 +100,39 @@ interface Task {
 interface TaskList {
   title: string
   tasks: Task[]
+}
+
+// 加载状态
+const isLoading = ref(true)
+const totalImages = ref(0)
+const loadedImages = ref(0)
+
+// 计算加载进度百分比
+const loadingProgress = computed(() => {
+  if (totalImages.value === 0) return 100
+  return Math.min(Math.round((loadedImages.value / totalImages.value) * 100), 100)
+})
+
+// 计算需要加载的图片总数
+const calculateTotalImages = () => {
+  let count = 0
+  taskLists.value.forEach(list => {
+    list.tasks.forEach(task => {
+      if (task.image) count++
+    })
+  })
+  return count
+}
+
+// 任务图片加载完成事件
+const onTaskImageLoaded = () => {
+  loadedImages.value++
+  if (loadedImages.value >= totalImages.value) {
+    // 所有图片加载完成，关闭加载状态
+    setTimeout(() => {
+      isLoading.value = false
+    }, 500) // 添加短暂延迟，确保布局已完成
+  }
 }
 
 // 示例数据
@@ -341,6 +391,14 @@ watch(taskLists, () => {
 
 // 组件挂载后初始化瀑布流布局
 onMounted(() => {
+  // 计算需要加载的图片总数
+  totalImages.value = calculateTotalImages()
+  
+  // 如果没有图片需要加载，直接关闭加载状态
+  if (totalImages.value === 0) {
+    isLoading.value = false
+  }
+  
   nextTick(() => {
     taskLists.value.forEach((_, listIndex) => {
       arrangeWaterfall(listIndex)
@@ -551,6 +609,72 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
 .kanban-container {
   height: calc(100vh - 120px);
   padding: 0 10px;
+  position: relative;
+}
+
+.global-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  backdrop-filter: blur(3px);
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 300px;
+}
+
+.loading-icon {
+  font-size: 40px;
+  color: #409eff;
+  animation: spin 1.5s linear infinite;
+  margin-bottom: 16px;
+}
+
+.loading-text {
+  font-size: 16px;
+  color: #606266;
+  margin-bottom: 20px;
+}
+
+.progress-container {
+  width: 100%;
+  height: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #409eff;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 14px;
+  color: #909399;
+  font-weight: 500;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .kanban-list {

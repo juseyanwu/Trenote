@@ -100,9 +100,10 @@ const props = defineProps<{
 }>()
 
 // 定义事件
-defineEmits<{
+const emit = defineEmits<{
   (e: 'edit'): void
   (e: 'delete'): void
+  (e: 'image-loaded'): void
 }>()
 
 // 图片加载状态
@@ -124,12 +125,14 @@ const imageContainerStyle = computed(() => {
 // 图片加载完成事件
 const onImageLoad = () => {
   imageLoaded.value = true
+  emit('image-loaded')
 }
 
 // 图片加载失败事件
 const onImageError = () => {
   imageError.value = true
   imageLoaded.value = true // 即使加载失败也标记为已加载，以便移除占位符
+  emit('image-loaded') // 即使加载失败也触发加载完成事件
 }
 
 // 计算优先级对应的类型
@@ -167,6 +170,9 @@ onMounted(() => {
     img.onload = onImageLoad
     img.onerror = onImageError
     img.src = props.task.image
+  } else {
+    // 如果没有图片，也需要触发加载完成事件
+    emit('image-loaded')
   }
 })
 </script>
