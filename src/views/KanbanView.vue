@@ -37,26 +37,29 @@
         <!-- 瀑布流任务卡片容器 -->
         <div class="waterfall-container p-4 max-h-[calc(100vh-180px)] overflow-y-auto">
           <div class="waterfall-wrapper" :id="`waterfall-${listIndex}`">
-            <draggable
-              :list="list.tasks"
+            <DraggableContainer
+              v-model="list.tasks"
               :group="{ name: 'tasks', pull: true, put: true }"
-              item-key="id"
-              ghost-class="ghost-card"
-              chosen-class="chosen-card"
-              animation="300"
+              :data-list-id="listIndex.toString()"
               @end="onDragEnd"
               :class="['min-h-[calc(100vh-250px)]', { 'empty-list': list.tasks.length === 0 }]"
             >
-              <template #item="{ element, index }">
-                <TaskCard
-                  :task="element"
-                  @edit="editTask(listIndex, index)"
-                  @delete="deleteTask(listIndex, index)"
-                  class="waterfall-item"
-                  @image-loaded="onTaskImageLoaded"
-                />
-              </template>
-            </draggable>
+              <DraggableTaskCard
+                v-for="(task, index) in list.tasks"
+                :key="task.id"
+                :task="task"
+                :list-index="listIndex"
+                :task-index="index"
+                @edit="editTask(listIndex, index)"
+                @delete="deleteTask(listIndex, index)"
+                @image-loaded="onTaskImageLoaded"
+                @drag-start="
+                  (event, listIndex, taskIndex) => onTaskDragStart(event, listIndex, taskIndex)
+                "
+                @drag-end="onTaskDragEnd"
+                class="waterfall-item"
+              />
+            </DraggableContainer>
           </div>
         </div>
       </div>
@@ -83,9 +86,9 @@
 import { ref, onMounted, nextTick, watch, computed } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { Plus, Loading } from '@element-plus/icons-vue'
-import TaskCard from '../components/TaskCard.vue'
 import TaskDetailDialog from '../components/TaskDetailDialog.vue'
-import draggable from 'vuedraggable'
+import DraggableTaskCard from '../components/DraggableTaskCard.vue'
+import DraggableContainer from '../components/DraggableContainer.vue'
 
 import { useKanbanStore } from '../stores/kanban'
 import type { Task } from '../stores/kanban'
@@ -122,251 +125,6 @@ const onTaskImageLoaded = () => {
     }, 500) // 添加短暂延迟，确保布局已完成
   }
 }
-
-// 默认示例数据
-// const defaultTaskLists: TaskList[] = [
-//   {
-//     title: '待办事项',
-//     tasks: [
-//       {
-//         id: 1,
-//         title: '完成项目设计',
-//         description: '设计看板应用的UI和交互',
-//         image: 'https://picsum.photos/300/200?random=1',
-//         tags: ['设计', 'UI'],
-//         priority: 'high',
-//         height: 280,
-//       },
-//       {
-//         id: 2,
-//         title: '研究瀑布流布局',
-//         description: '学习如何实现小红书风格的瀑布流',
-//         image: 'https://picsum.photos/300/350?random=2',
-//         tags: ['研究', '布局'],
-//         priority: 'medium',
-//         height: 380,
-//       },
-//       {
-//         id: 3,
-//         title: '准备周会演示',
-//         description: '准备下周的项目进度演示',
-//         image: 'https://picsum.photos/300/250?random=3',
-//         tags: ['会议', '演示'],
-//         priority: 'low',
-//         height: 320,
-//       },
-//       {
-//         id: 11,
-//         title: '学习Vue 3组合式API',
-//         description: '深入理解Vue 3的组合式API和响应式系统',
-//         image: 'https://picsum.photos/300/220?random=11',
-//         tags: ['学习', 'Vue3'],
-//         priority: 'medium',
-//         height: 300,
-//       },
-//       {
-//         id: 12,
-//         title: '阅读Tailwind CSS文档',
-//         description: '学习Tailwind CSS的使用技巧和最佳实践',
-//         image: 'https://picsum.photos/300/280?random=12',
-//         tags: ['CSS', '文档'],
-//         priority: 'low',
-//         height: 340,
-//       },
-//       {
-//         id: 13,
-//         title: '探索Element Plus组件库',
-//         description: '了解Element Plus提供的各种组件和功能',
-//         image: 'https://picsum.photos/300/260?random=13',
-//         tags: ['UI库', '组件'],
-//         priority: 'medium',
-//         height: 320,
-//       },
-//     ],
-//   },
-//   {
-//     title: '进行中',
-//     tasks: [
-//       {
-//         id: 4,
-//         title: '实现拖拽功能',
-//         description: '添加任务卡片的拖拽功能',
-//         image: 'https://picsum.photos/300/280?random=4',
-//         tags: ['功能', '交互'],
-//         priority: 'medium',
-//         height: 340,
-//       },
-//       {
-//         id: 5,
-//         title: '优化移动端体验',
-//         description: '确保在移动设备上有良好的用户体验',
-//         image: 'https://picsum.photos/300/220?random=5',
-//         tags: ['移动端', '优化'],
-//         priority: 'high',
-//         height: 300,
-//       },
-//       {
-//         id: 14,
-//         title: '编写单元测试',
-//         description: '为关键组件编写单元测试，确保代码质量',
-//         image: 'https://picsum.photos/300/240?random=14',
-//         tags: ['测试', '质量'],
-//         priority: 'high',
-//         height: 310,
-//       },
-//       {
-//         id: 15,
-//         title: '实现数据持久化',
-//         description: '使用localStorage或IndexedDB存储任务数据',
-//         image: 'https://picsum.photos/300/260?random=15',
-//         tags: ['存储', '功能'],
-//         priority: 'medium',
-//         height: 330,
-//       },
-//       {
-//         id: 16,
-//         title: '添加主题切换功能',
-//         description: '实现明暗主题切换，提升用户体验',
-//         image: 'https://picsum.photos/300/230?random=16',
-//         tags: ['主题', 'UI'],
-//         priority: 'low',
-//         height: 290,
-//       },
-//     ],
-//   },
-//   {
-//     title: '已完成',
-//     tasks: [
-//       {
-//         id: 6,
-//         title: '项目初始化',
-//         description: '设置Vue 3项目和安装依赖',
-//         image: 'https://picsum.photos/300/240?random=6',
-//         tags: ['初始化', '配置'],
-//         priority: 'high',
-//         height: 310,
-//       },
-//       {
-//         id: 7,
-//         title: '设计数据结构',
-//         description: '规划应用的数据模型和状态管理',
-//         image: 'https://picsum.photos/300/260?random=7',
-//         tags: ['设计', '数据'],
-//         priority: 'medium',
-//         height: 320,
-//       },
-//       {
-//         id: 8,
-//         title: '创建基础组件',
-//         description: '开发应用所需的基础UI组件',
-//         image: 'https://picsum.photos/300/230?random=8',
-//         tags: ['组件', '开发'],
-//         priority: 'medium',
-//         height: 300,
-//       },
-//       {
-//         id: 9,
-//         title: '配置路由系统',
-//         description: '使用Vue Router设置应用路由',
-//         image: 'https://picsum.photos/300/250?random=9',
-//         tags: ['路由', '配置'],
-//         priority: 'low',
-//         height: 310,
-//       },
-//       {
-//         id: 10,
-//         title: '集成Element Plus',
-//         description: '引入Element Plus组件库并配置主题',
-//         image: 'https://picsum.photos/300/270?random=10',
-//         tags: ['UI库', '集成'],
-//         priority: 'high',
-//         height: 330,
-//       },
-//     ],
-//   },
-//   {
-//     title: '待评审',
-//     tasks: [
-//       {
-//         id: 17,
-//         title: '优化性能',
-//         description: '分析并优化应用性能，减少不必要的渲染',
-//         image: 'https://picsum.photos/300/240?random=17',
-//         tags: ['性能', '优化'],
-//         priority: 'high',
-//         height: 310,
-//       },
-//       {
-//         id: 18,
-//         title: '重构代码',
-//         description: '重构部分组件代码，提高可维护性',
-//         image: 'https://picsum.photos/300/220?random=18',
-//         tags: ['重构', '代码质量'],
-//         priority: 'medium',
-//         height: 290,
-//       },
-//       {
-//         id: 19,
-//         title: '添加动画效果',
-//         description: '为用户交互添加平滑的过渡动画',
-//         image: 'https://picsum.photos/300/260?random=19',
-//         tags: ['动画', 'UI'],
-//         priority: 'low',
-//         height: 320,
-//       },
-//       {
-//         id: 20,
-//         title: '编写文档',
-//         description: '编写项目文档和使用说明',
-//         image: 'https://picsum.photos/300/230?random=20',
-//         tags: ['文档', '说明'],
-//         priority: 'medium',
-//         height: 300,
-//       },
-//     ],
-//   },
-//   {
-//     title: '已归档',
-//     tasks: [
-//       {
-//         id: 21,
-//         title: '需求分析',
-//         description: '分析项目需求并确定功能范围',
-//         image: 'https://picsum.photos/300/250?random=21',
-//         tags: ['需求', '分析'],
-//         priority: 'high',
-//         height: 320,
-//       },
-//       {
-//         id: 22,
-//         title: '技术选型',
-//         description: '评估并选择适合项目的技术栈',
-//         image: 'https://picsum.photos/300/230?random=22',
-//         tags: ['技术', '决策'],
-//         priority: 'high',
-//         height: 300,
-//       },
-//       {
-//         id: 23,
-//         title: '原型设计',
-//         description: '设计应用的交互原型',
-//         image: 'https://picsum.photos/300/270?random=23',
-//         tags: ['设计', '原型'],
-//         priority: 'medium',
-//         height: 330,
-//       },
-//       {
-//         id: 24,
-//         title: '项目计划',
-//         description: '制定项目开发计划和时间表',
-//         image: 'https://picsum.photos/300/240?random=24',
-//         tags: ['计划', '管理'],
-//         priority: 'medium',
-//         height: 310,
-//       },
-//     ],
-//   },
-// ]
 
 // 使用Pinia store中的任务列表数据
 const taskLists = computed(() => kanbanStore.taskLists)
@@ -503,19 +261,48 @@ const arrangeWaterfall = (listIndex: number) => {
   }
 }
 
-// 拖拽结束事件处理
-const onDragEnd = () => {
-  ElMessage({
-    type: 'success',
-    message: '任务已移动',
-  })
+// 拖拽开始事件处理
+const onTaskDragStart = (event: DragEvent, listIndex: number, taskIndex: number) => {
+  // 可以在这里添加额外的拖拽开始逻辑
+  console.log('Drag started:', listIndex, taskIndex)
+}
 
-  // 重新布局瀑布流
-  nextTick(() => {
-    taskLists.value.forEach((_, listIndex) => {
-      arrangeWaterfall(listIndex)
+// 拖拽结束事件处理
+const onTaskDragEnd = () => {
+  // 可以在这里添加额外的拖拽结束逻辑
+  console.log('Drag ended')
+}
+
+// 拖拽结束事件处理（从一个列表到另一个列表）
+const onDragEnd = (event: never) => {
+  const { from, to, oldIndex, newIndex } = event
+
+  // 将数字字符串转换为数字
+  const fromListIndex = parseInt(from)
+  const toListIndex = parseInt(to)
+
+  if (!isNaN(fromListIndex) && !isNaN(toListIndex)) {
+    // 获取要移动的任务
+    const task = taskLists.value[fromListIndex].tasks[oldIndex]
+
+    // 从源列表中移除任务
+    kanbanStore.deleteTask(fromListIndex, oldIndex)
+
+    // 添加到目标列表
+    kanbanStore.addTaskAtIndex(toListIndex, task, newIndex)
+
+    ElMessage({
+      type: 'success',
+      message: '任务已移动',
     })
-  })
+
+    // 重新布局瀑布流
+    nextTick(() => {
+      taskLists.value.forEach((_, listIndex) => {
+        arrangeWaterfall(listIndex)
+      })
+    })
+  }
 }
 
 // 添加新列表

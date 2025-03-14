@@ -29,7 +29,8 @@ const defaultTaskLists: TaskList[] = [
         id: 1,
         title: '完成项目设计',
         description: '设计看板应用的UI和交互',
-        image: 'https://jelzzunj1rsba6li.public.blob.vercel-storage.com/trenote-0-xcNMtIByXuKgIOQkuHfmURORNtzkz1',
+        image:
+          'https://jelzzunj1rsba6li.public.blob.vercel-storage.com/trenote-0-xcNMtIByXuKgIOQkuHfmURORNtzkz1',
         tags: ['设计', 'UI'],
         priority: 'high',
         height: 280,
@@ -47,7 +48,8 @@ const defaultTaskLists: TaskList[] = [
         id: 3,
         title: '准备周会演示',
         description: '准备下周的项目进度演示',
-        image: 'https://jelzzunj1rsba6li.public.blob.vercel-storage.com/trenote-0-xcNMtIByXuKgIOQkuHfmURORNtzkz1',
+        image:
+          'https://jelzzunj1rsba6li.public.blob.vercel-storage.com/trenote-0-xcNMtIByXuKgIOQkuHfmURORNtzkz1',
         tags: ['会议', '演示'],
         priority: 'low',
         height: 320,
@@ -352,10 +354,27 @@ export const useKanbanStore = defineStore('kanban', () => {
     return false
   }
 
+  // 在特定位置添加任务
+  function addTaskAtIndex(listIndex: number, task: Task, taskIndex: number) {
+    if (listIndex >= 0 && listIndex < taskLists.value.length) {
+      // 如果索引超出范围，则添加到末尾
+      if (taskIndex < 0 || taskIndex > taskLists.value[listIndex].tasks.length) {
+        taskIndex = taskLists.value[listIndex].tasks.length
+      }
+
+      // 在指定位置插入任务
+      taskLists.value[listIndex].tasks.splice(taskIndex, 0, task)
+      saveTaskListsToStorage()
+      return true
+    }
+    return false
+  }
+
   return {
     taskLists,
     addList,
     addTask,
+    addTaskAtIndex,
     updateTask,
     deleteTask,
     saveTaskListsToStorage,
