@@ -87,24 +87,9 @@ import TaskCard from '../components/TaskCard.vue'
 import TaskDetailDialog from '../components/TaskDetailDialog.vue'
 import draggable from 'vuedraggable'
 
-// 定义任务类型
-interface Task {
-  id: number
-  title: string
-  description?: string
-  image?: string
-  tags?: string[]
-  dueDate?: Date
-  priority?: 'low' | 'medium' | 'high'
-  height?: number // 用于瀑布流布局
-}
-
-// 定义任务列表类型
-interface TaskList {
-  title: string
-  tasks: Task[]
-}
-
+import { useKanbanStore } from '../stores/kanban'
+import type { Task } from '../stores/kanban'
+const kanbanStore = useKanbanStore()
 // 加载状态
 const isLoading = ref(true)
 const totalImages = ref(0)
@@ -139,278 +124,254 @@ const onTaskImageLoaded = () => {
 }
 
 // 默认示例数据
-const defaultTaskLists: TaskList[] = [
-  {
-    title: '待办事项',
-    tasks: [
-      {
-        id: 1,
-        title: '完成项目设计',
-        description: '设计看板应用的UI和交互',
-        image: 'https://picsum.photos/300/200?random=1',
-        tags: ['设计', 'UI'],
-        priority: 'high',
-        height: 280,
-      },
-      {
-        id: 2,
-        title: '研究瀑布流布局',
-        description: '学习如何实现小红书风格的瀑布流',
-        image: 'https://picsum.photos/300/350?random=2',
-        tags: ['研究', '布局'],
-        priority: 'medium',
-        height: 380,
-      },
-      {
-        id: 3,
-        title: '准备周会演示',
-        description: '准备下周的项目进度演示',
-        image: 'https://picsum.photos/300/250?random=3',
-        tags: ['会议', '演示'],
-        priority: 'low',
-        height: 320,
-      },
-      {
-        id: 11,
-        title: '学习Vue 3组合式API',
-        description: '深入理解Vue 3的组合式API和响应式系统',
-        image: 'https://picsum.photos/300/220?random=11',
-        tags: ['学习', 'Vue3'],
-        priority: 'medium',
-        height: 300,
-      },
-      {
-        id: 12,
-        title: '阅读Tailwind CSS文档',
-        description: '学习Tailwind CSS的使用技巧和最佳实践',
-        image: 'https://picsum.photos/300/280?random=12',
-        tags: ['CSS', '文档'],
-        priority: 'low',
-        height: 340,
-      },
-      {
-        id: 13,
-        title: '探索Element Plus组件库',
-        description: '了解Element Plus提供的各种组件和功能',
-        image: 'https://picsum.photos/300/260?random=13',
-        tags: ['UI库', '组件'],
-        priority: 'medium',
-        height: 320,
-      },
-    ],
-  },
-  {
-    title: '进行中',
-    tasks: [
-      {
-        id: 4,
-        title: '实现拖拽功能',
-        description: '添加任务卡片的拖拽功能',
-        image: 'https://picsum.photos/300/280?random=4',
-        tags: ['功能', '交互'],
-        priority: 'medium',
-        height: 340,
-      },
-      {
-        id: 5,
-        title: '优化移动端体验',
-        description: '确保在移动设备上有良好的用户体验',
-        image: 'https://picsum.photos/300/220?random=5',
-        tags: ['移动端', '优化'],
-        priority: 'high',
-        height: 300,
-      },
-      {
-        id: 14,
-        title: '编写单元测试',
-        description: '为关键组件编写单元测试，确保代码质量',
-        image: 'https://picsum.photos/300/240?random=14',
-        tags: ['测试', '质量'],
-        priority: 'high',
-        height: 310,
-      },
-      {
-        id: 15,
-        title: '实现数据持久化',
-        description: '使用localStorage或IndexedDB存储任务数据',
-        image: 'https://picsum.photos/300/260?random=15',
-        tags: ['存储', '功能'],
-        priority: 'medium',
-        height: 330,
-      },
-      {
-        id: 16,
-        title: '添加主题切换功能',
-        description: '实现明暗主题切换，提升用户体验',
-        image: 'https://picsum.photos/300/230?random=16',
-        tags: ['主题', 'UI'],
-        priority: 'low',
-        height: 290,
-      },
-    ],
-  },
-  {
-    title: '已完成',
-    tasks: [
-      {
-        id: 6,
-        title: '项目初始化',
-        description: '设置Vue 3项目和安装依赖',
-        image: 'https://picsum.photos/300/240?random=6',
-        tags: ['初始化', '配置'],
-        priority: 'high',
-        height: 310,
-      },
-      {
-        id: 7,
-        title: '设计数据结构',
-        description: '规划应用的数据模型和状态管理',
-        image: 'https://picsum.photos/300/260?random=7',
-        tags: ['设计', '数据'],
-        priority: 'medium',
-        height: 320,
-      },
-      {
-        id: 8,
-        title: '创建基础组件',
-        description: '开发应用所需的基础UI组件',
-        image: 'https://picsum.photos/300/230?random=8',
-        tags: ['组件', '开发'],
-        priority: 'medium',
-        height: 300,
-      },
-      {
-        id: 9,
-        title: '配置路由系统',
-        description: '使用Vue Router设置应用路由',
-        image: 'https://picsum.photos/300/250?random=9',
-        tags: ['路由', '配置'],
-        priority: 'low',
-        height: 310,
-      },
-      {
-        id: 10,
-        title: '集成Element Plus',
-        description: '引入Element Plus组件库并配置主题',
-        image: 'https://picsum.photos/300/270?random=10',
-        tags: ['UI库', '集成'],
-        priority: 'high',
-        height: 330,
-      },
-    ],
-  },
-  {
-    title: '待评审',
-    tasks: [
-      {
-        id: 17,
-        title: '优化性能',
-        description: '分析并优化应用性能，减少不必要的渲染',
-        image: 'https://picsum.photos/300/240?random=17',
-        tags: ['性能', '优化'],
-        priority: 'high',
-        height: 310,
-      },
-      {
-        id: 18,
-        title: '重构代码',
-        description: '重构部分组件代码，提高可维护性',
-        image: 'https://picsum.photos/300/220?random=18',
-        tags: ['重构', '代码质量'],
-        priority: 'medium',
-        height: 290,
-      },
-      {
-        id: 19,
-        title: '添加动画效果',
-        description: '为用户交互添加平滑的过渡动画',
-        image: 'https://picsum.photos/300/260?random=19',
-        tags: ['动画', 'UI'],
-        priority: 'low',
-        height: 320,
-      },
-      {
-        id: 20,
-        title: '编写文档',
-        description: '编写项目文档和使用说明',
-        image: 'https://picsum.photos/300/230?random=20',
-        tags: ['文档', '说明'],
-        priority: 'medium',
-        height: 300,
-      },
-    ],
-  },
-  {
-    title: '已归档',
-    tasks: [
-      {
-        id: 21,
-        title: '需求分析',
-        description: '分析项目需求并确定功能范围',
-        image: 'https://picsum.photos/300/250?random=21',
-        tags: ['需求', '分析'],
-        priority: 'high',
-        height: 320,
-      },
-      {
-        id: 22,
-        title: '技术选型',
-        description: '评估并选择适合项目的技术栈',
-        image: 'https://picsum.photos/300/230?random=22',
-        tags: ['技术', '决策'],
-        priority: 'high',
-        height: 300,
-      },
-      {
-        id: 23,
-        title: '原型设计',
-        description: '设计应用的交互原型',
-        image: 'https://picsum.photos/300/270?random=23',
-        tags: ['设计', '原型'],
-        priority: 'medium',
-        height: 330,
-      },
-      {
-        id: 24,
-        title: '项目计划',
-        description: '制定项目开发计划和时间表',
-        image: 'https://picsum.photos/300/240?random=24',
-        tags: ['计划', '管理'],
-        priority: 'medium',
-        height: 310,
-      },
-    ],
-  },
-]
+// const defaultTaskLists: TaskList[] = [
+//   {
+//     title: '待办事项',
+//     tasks: [
+//       {
+//         id: 1,
+//         title: '完成项目设计',
+//         description: '设计看板应用的UI和交互',
+//         image: 'https://picsum.photos/300/200?random=1',
+//         tags: ['设计', 'UI'],
+//         priority: 'high',
+//         height: 280,
+//       },
+//       {
+//         id: 2,
+//         title: '研究瀑布流布局',
+//         description: '学习如何实现小红书风格的瀑布流',
+//         image: 'https://picsum.photos/300/350?random=2',
+//         tags: ['研究', '布局'],
+//         priority: 'medium',
+//         height: 380,
+//       },
+//       {
+//         id: 3,
+//         title: '准备周会演示',
+//         description: '准备下周的项目进度演示',
+//         image: 'https://picsum.photos/300/250?random=3',
+//         tags: ['会议', '演示'],
+//         priority: 'low',
+//         height: 320,
+//       },
+//       {
+//         id: 11,
+//         title: '学习Vue 3组合式API',
+//         description: '深入理解Vue 3的组合式API和响应式系统',
+//         image: 'https://picsum.photos/300/220?random=11',
+//         tags: ['学习', 'Vue3'],
+//         priority: 'medium',
+//         height: 300,
+//       },
+//       {
+//         id: 12,
+//         title: '阅读Tailwind CSS文档',
+//         description: '学习Tailwind CSS的使用技巧和最佳实践',
+//         image: 'https://picsum.photos/300/280?random=12',
+//         tags: ['CSS', '文档'],
+//         priority: 'low',
+//         height: 340,
+//       },
+//       {
+//         id: 13,
+//         title: '探索Element Plus组件库',
+//         description: '了解Element Plus提供的各种组件和功能',
+//         image: 'https://picsum.photos/300/260?random=13',
+//         tags: ['UI库', '组件'],
+//         priority: 'medium',
+//         height: 320,
+//       },
+//     ],
+//   },
+//   {
+//     title: '进行中',
+//     tasks: [
+//       {
+//         id: 4,
+//         title: '实现拖拽功能',
+//         description: '添加任务卡片的拖拽功能',
+//         image: 'https://picsum.photos/300/280?random=4',
+//         tags: ['功能', '交互'],
+//         priority: 'medium',
+//         height: 340,
+//       },
+//       {
+//         id: 5,
+//         title: '优化移动端体验',
+//         description: '确保在移动设备上有良好的用户体验',
+//         image: 'https://picsum.photos/300/220?random=5',
+//         tags: ['移动端', '优化'],
+//         priority: 'high',
+//         height: 300,
+//       },
+//       {
+//         id: 14,
+//         title: '编写单元测试',
+//         description: '为关键组件编写单元测试，确保代码质量',
+//         image: 'https://picsum.photos/300/240?random=14',
+//         tags: ['测试', '质量'],
+//         priority: 'high',
+//         height: 310,
+//       },
+//       {
+//         id: 15,
+//         title: '实现数据持久化',
+//         description: '使用localStorage或IndexedDB存储任务数据',
+//         image: 'https://picsum.photos/300/260?random=15',
+//         tags: ['存储', '功能'],
+//         priority: 'medium',
+//         height: 330,
+//       },
+//       {
+//         id: 16,
+//         title: '添加主题切换功能',
+//         description: '实现明暗主题切换，提升用户体验',
+//         image: 'https://picsum.photos/300/230?random=16',
+//         tags: ['主题', 'UI'],
+//         priority: 'low',
+//         height: 290,
+//       },
+//     ],
+//   },
+//   {
+//     title: '已完成',
+//     tasks: [
+//       {
+//         id: 6,
+//         title: '项目初始化',
+//         description: '设置Vue 3项目和安装依赖',
+//         image: 'https://picsum.photos/300/240?random=6',
+//         tags: ['初始化', '配置'],
+//         priority: 'high',
+//         height: 310,
+//       },
+//       {
+//         id: 7,
+//         title: '设计数据结构',
+//         description: '规划应用的数据模型和状态管理',
+//         image: 'https://picsum.photos/300/260?random=7',
+//         tags: ['设计', '数据'],
+//         priority: 'medium',
+//         height: 320,
+//       },
+//       {
+//         id: 8,
+//         title: '创建基础组件',
+//         description: '开发应用所需的基础UI组件',
+//         image: 'https://picsum.photos/300/230?random=8',
+//         tags: ['组件', '开发'],
+//         priority: 'medium',
+//         height: 300,
+//       },
+//       {
+//         id: 9,
+//         title: '配置路由系统',
+//         description: '使用Vue Router设置应用路由',
+//         image: 'https://picsum.photos/300/250?random=9',
+//         tags: ['路由', '配置'],
+//         priority: 'low',
+//         height: 310,
+//       },
+//       {
+//         id: 10,
+//         title: '集成Element Plus',
+//         description: '引入Element Plus组件库并配置主题',
+//         image: 'https://picsum.photos/300/270?random=10',
+//         tags: ['UI库', '集成'],
+//         priority: 'high',
+//         height: 330,
+//       },
+//     ],
+//   },
+//   {
+//     title: '待评审',
+//     tasks: [
+//       {
+//         id: 17,
+//         title: '优化性能',
+//         description: '分析并优化应用性能，减少不必要的渲染',
+//         image: 'https://picsum.photos/300/240?random=17',
+//         tags: ['性能', '优化'],
+//         priority: 'high',
+//         height: 310,
+//       },
+//       {
+//         id: 18,
+//         title: '重构代码',
+//         description: '重构部分组件代码，提高可维护性',
+//         image: 'https://picsum.photos/300/220?random=18',
+//         tags: ['重构', '代码质量'],
+//         priority: 'medium',
+//         height: 290,
+//       },
+//       {
+//         id: 19,
+//         title: '添加动画效果',
+//         description: '为用户交互添加平滑的过渡动画',
+//         image: 'https://picsum.photos/300/260?random=19',
+//         tags: ['动画', 'UI'],
+//         priority: 'low',
+//         height: 320,
+//       },
+//       {
+//         id: 20,
+//         title: '编写文档',
+//         description: '编写项目文档和使用说明',
+//         image: 'https://picsum.photos/300/230?random=20',
+//         tags: ['文档', '说明'],
+//         priority: 'medium',
+//         height: 300,
+//       },
+//     ],
+//   },
+//   {
+//     title: '已归档',
+//     tasks: [
+//       {
+//         id: 21,
+//         title: '需求分析',
+//         description: '分析项目需求并确定功能范围',
+//         image: 'https://picsum.photos/300/250?random=21',
+//         tags: ['需求', '分析'],
+//         priority: 'high',
+//         height: 320,
+//       },
+//       {
+//         id: 22,
+//         title: '技术选型',
+//         description: '评估并选择适合项目的技术栈',
+//         image: 'https://picsum.photos/300/230?random=22',
+//         tags: ['技术', '决策'],
+//         priority: 'high',
+//         height: 300,
+//       },
+//       {
+//         id: 23,
+//         title: '原型设计',
+//         description: '设计应用的交互原型',
+//         image: 'https://picsum.photos/300/270?random=23',
+//         tags: ['设计', '原型'],
+//         priority: 'medium',
+//         height: 330,
+//       },
+//       {
+//         id: 24,
+//         title: '项目计划',
+//         description: '制定项目开发计划和时间表',
+//         image: 'https://picsum.photos/300/240?random=24',
+//         tags: ['计划', '管理'],
+//         priority: 'medium',
+//         height: 310,
+//       },
+//     ],
+//   },
+// ]
 
-// 从localStorage加载数据或使用默认数据
-const loadTaskListsFromStorage = (): TaskList[] => {
-  try {
-    const savedData = localStorage.getItem('kanban-task-lists')
-    if (savedData) {
-      return JSON.parse(savedData)
-    }
-  } catch (error) {
-    console.error('从本地存储加载数据失败:', error)
-    ElMessage.error('加载保存的数据失败，将使用默认数据')
-  }
-  return defaultTaskLists
-}
+// 使用Pinia store中的任务列表数据
+const taskLists = computed(() => kanbanStore.taskLists)
 
-// 保存数据到localStorage
-const saveTaskListsToStorage = () => {
-  try {
-    localStorage.setItem('kanban-task-lists', JSON.stringify(taskLists.value))
-  } catch (error) {
-    console.error('保存数据到本地存储失败:', error)
-    ElMessage.error('保存数据失败')
-  }
-}
-
-// 初始化任务列表数据
-const taskLists = ref<TaskList[]>(loadTaskListsFromStorage())
-
-// 监听任务列表变化，重新布局瀑布流并保存到localStorage
+// 监听任务列表变化，重新布局瀑布流
 watch(
   taskLists,
   () => {
@@ -418,8 +379,6 @@ watch(
       taskLists.value.forEach((_, listIndex) => {
         arrangeWaterfall(listIndex)
       })
-      // 保存数据到localStorage
-      saveTaskListsToStorage()
     })
   },
   { deep: true },
@@ -553,8 +512,6 @@ const onDragEnd = () => {
     taskLists.value.forEach((_, listIndex) => {
       arrangeWaterfall(listIndex)
     })
-    // 保存数据到localStorage
-    saveTaskListsToStorage()
   })
 }
 
@@ -566,16 +523,11 @@ const addList = () => {
   })
     .then(({ value }) => {
       if (value) {
-        taskLists.value.push({
-          title: value,
-          tasks: [],
-        })
+        kanbanStore.addList(value)
         ElMessage({
           type: 'success',
           message: `成功创建列表: ${value}`,
         })
-        // 保存数据到localStorage
-        saveTaskListsToStorage()
       }
     })
     .catch(() => {})
@@ -616,21 +568,20 @@ const editTask = (listIndex: number, taskIndex: number) => {
 const saveTask = (task: Task) => {
   if (isNewTask.value) {
     // 添加新任务
-    taskLists.value[currentListIndex.value].tasks.push(task)
+    kanbanStore.addTask(currentListIndex.value, task)
     ElMessage({
       type: 'success',
       message: `成功添加任务: ${task.title}`,
     })
   } else {
     // 更新现有任务
-    taskLists.value[currentListIndex.value].tasks[currentTaskIndex.value] = task
+    kanbanStore.updateTask(currentListIndex.value, currentTaskIndex.value, task)
     ElMessage({
       type: 'success',
       message: '任务已更新',
     })
   }
-  // 保存数据到localStorage
-  saveTaskListsToStorage()
+  // Pinia store已经处理了数据持久化，不需要再调用saveTaskListsToStorage
 }
 
 // 删除任务
@@ -641,13 +592,12 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
     type: 'warning',
   })
     .then(() => {
-      taskLists.value[listIndex].tasks.splice(taskIndex, 1)
+      kanbanStore.deleteTask(listIndex, taskIndex)
       ElMessage({
         type: 'success',
         message: '任务已删除',
       })
-      // 保存数据到localStorage
-      saveTaskListsToStorage()
+      // Pinia store已经处理了数据持久化，不需要再调用saveTaskListsToStorage
     })
     .catch(() => {})
 }
