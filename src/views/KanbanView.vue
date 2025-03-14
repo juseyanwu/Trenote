@@ -389,6 +389,9 @@ onMounted(() => {
   // 计算需要加载的图片总数
   totalImages.value = calculateTotalImages()
 
+  // 重置已加载图片计数
+  loadedImages.value = 0
+
   // 如果没有图片需要加载，直接关闭加载状态
   if (totalImages.value === 0) {
     isLoading.value = false

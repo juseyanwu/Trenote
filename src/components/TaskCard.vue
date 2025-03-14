@@ -1,75 +1,63 @@
 <template>
-  <div class="task-card bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
+  <div
+    class="task-card bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300"
+  >
     <!-- 卡片图片 -->
     <div v-if="task.image" :class="`card-image card-image-${task.id}`" :style="imageContainerStyle">
-      <div v-if="!imageLoaded" class="image-placeholder bg-gray-200 flex items-center justify-center">
+      <div
+        v-if="!imageLoaded"
+        class="image-placeholder bg-gray-200 flex items-center justify-center"
+      >
         <el-icon class="text-gray-400 text-xl"><Picture /></el-icon>
       </div>
-      <img 
-        :src="task.image" 
-        :alt="task.title" 
-        class="w-full object-cover" 
-        @load="onImageLoad" 
+      <img
+        :src="task.image"
+        :alt="task.title"
+        class="w-full object-cover"
+        @load="onImageLoad"
         @error="onImageError"
         :style="imageLoaded ? '' : 'display: none;'"
-      >
+      />
     </div>
-    
+
     <!-- 卡片内容 -->
     <div class="card-content p-4">
       <!-- 标题 -->
       <h4 class="text-base font-medium text-gray-800 mb-3 line-clamp-2">{{ task.title }}</h4>
-      
+
       <!-- 描述 -->
       <p v-if="task.description" class="text-sm text-gray-600 mb-3 line-clamp-3">
         {{ task.description }}
       </p>
-      
+
       <!-- 标签 -->
       <div v-if="task.tags && task.tags.length" class="tags-container flex flex-wrap gap-1 mb-3">
-        <el-tag 
-          v-for="(tag, index) in task.tags" 
-          :key="index" 
-          size="small" 
+        <el-tag
+          v-for="(tag, index) in task.tags"
+          :key="index"
+          size="small"
           effect="plain"
           class="text-xs"
         >
           {{ tag }}
         </el-tag>
       </div>
-      
+
       <!-- 底部操作栏 -->
       <div class="card-footer flex justify-between items-center mt-3">
         <!-- 优先级标识 -->
         <div class="priority-indicator">
-          <el-tag 
-            :type="priorityType" 
-            size="small" 
-            effect="plain"
-            class="text-xs"
-          >
+          <el-tag :type="priorityType" size="small" effect="plain" class="text-xs">
             {{ priorityText }}
           </el-tag>
         </div>
-        
+
         <!-- 操作按钮 -->
         <div class="action-buttons flex">
-          <el-button 
-            type="primary" 
-            size="small" 
-            circle 
-            plain
-            @click="$emit('edit')"
-          >
+          <el-button type="primary" size="small" circle plain @click="$emit('edit')">
             <el-icon><Edit /></el-icon>
           </el-button>
-          <el-button 
-            type="danger" 
-            size="small" 
-            circle 
-            plain
-            @click="$emit('delete')"
-          >
+          <el-button type="danger" size="small" circle plain @click="$emit('delete')">
             <el-icon><Delete /></el-icon>
           </el-button>
         </div>
@@ -114,11 +102,11 @@ const imageError = ref(false)
 const imageContainerStyle = computed(() => {
   if (props.task.height) {
     return {
-      height: `${props.task.height / 2}px`
+      height: `${props.task.height / 2}px`,
     }
   }
   return {
-    height: '150px' // 默认高度
+    height: '150px', // 默认高度
   }
 })
 
@@ -170,10 +158,8 @@ onMounted(() => {
     img.onload = onImageLoad
     img.onerror = onImageError
     img.src = props.task.image
-  } else {
-    // 如果没有图片，也需要触发加载完成事件
-    emit('image-loaded')
   }
+  // 移除这里的emit调用，只在有图片且图片加载完成时触发事件
 })
 </script>
 
@@ -191,7 +177,9 @@ onMounted(() => {
 
 .task-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 .card-image {
@@ -228,4 +216,4 @@ onMounted(() => {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-</style> 
+</style>
