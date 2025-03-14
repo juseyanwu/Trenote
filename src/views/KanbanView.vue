@@ -5,47 +5,50 @@
       <div class="loading-content">
         <el-icon class="loading-icon"><Loading /></el-icon>
         <div class="loading-text">正在加载任务列表...</div>
-        
+
         <!-- 加载进度条 -->
         <div class="progress-container">
           <div class="progress-bar" :style="{ width: `${loadingProgress}%` }"></div>
         </div>
-        
+
         <!-- 加载进度百分比 -->
         <div class="progress-text">{{ loadingProgress }}%</div>
       </div>
     </div>
-    
+
     <div class="flex overflow-x-auto pb-4 pt-2 px-2 gap-8">
       <!-- 任务列表容器 -->
-      <div 
-        v-for="(list, listIndex) in taskLists" 
-        :key="listIndex" 
+      <div
+        v-for="(list, listIndex) in taskLists"
+        :key="listIndex"
         class="kanban-list bg-gray-100 rounded-lg shadow-md flex-shrink-0"
       >
         <!-- 列表标题 -->
+
         <div class="list-header p-4 border-b border-gray-200 flex justify-between items-center">
-          <h3 class="font-semibold text-gray-700 text-lg">{{ list.title }} <span class="text-sm text-gray-500">({{ list.tasks.length }})</span></h3>
+          <h3 class="font-semibold text-gray-700 text-lg">
+            {{ list.title }} <span class="text-sm text-gray-500">({{ list.tasks.length }})</span>
+          </h3>
           <el-button type="primary" size="small" circle @click="addTask(listIndex)">
             <el-icon><Plus /></el-icon>
           </el-button>
         </div>
-        
+
         <!-- 瀑布流任务卡片容器 -->
         <div class="waterfall-container p-4 max-h-[calc(100vh-180px)] overflow-y-auto">
           <div class="waterfall-wrapper" :id="`waterfall-${listIndex}`">
             <draggable
-              :list="list.tasks" 
+              :list="list.tasks"
               :group="{ name: 'tasks', pull: true, put: true }"
               item-key="id"
               ghost-class="ghost-card"
               chosen-class="chosen-card"
               animation="300"
               @end="onDragEnd"
-              :class="['min-h-[calc(100vh-250px)]', {'empty-list': list.tasks.length === 0}]"
+              :class="['min-h-[calc(100vh-250px)]', { 'empty-list': list.tasks.length === 0 }]"
             >
               <template #item="{ element, index }">
-                <TaskCard 
+                <TaskCard
                   :task="element"
                   @edit="editTask(listIndex, index)"
                   @delete="deleteTask(listIndex, index)"
@@ -57,16 +60,16 @@
           </div>
         </div>
       </div>
-      
+
       <!-- 添加新列表按钮 -->
-      <div class="add-list-btn flex-shrink-0" style="width: 380px;">
+      <div class="add-list-btn flex-shrink-0" style="width: 380px">
         <el-button type="primary" plain class="w-full" @click="addList">
           <el-icon class="mr-2"><Plus /></el-icon>添加新列表
         </el-button>
       </div>
     </div>
   </div>
-  
+
   <!-- 任务详情对话框 -->
   <TaskDetailDialog
     v-model:visible="detailDialogVisible"
@@ -79,7 +82,7 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick, watch, computed } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import { Plus, Document, Loading } from '@element-plus/icons-vue'
+import { Plus, Loading } from '@element-plus/icons-vue'
 import TaskCard from '../components/TaskCard.vue'
 import TaskDetailDialog from '../components/TaskDetailDialog.vue'
 import draggable from 'vuedraggable'
@@ -116,8 +119,8 @@ const loadingProgress = computed(() => {
 // 计算需要加载的图片总数
 const calculateTotalImages = () => {
   let count = 0
-  taskLists.value.forEach(list => {
-    list.tasks.forEach(task => {
+  taskLists.value.forEach((list) => {
+    list.tasks.forEach((task) => {
       if (task.image) count++
     })
   })
@@ -135,8 +138,8 @@ const onTaskImageLoaded = () => {
   }
 }
 
-// 示例数据
-const taskLists = ref<TaskList[]>([
+// 默认示例数据
+const defaultTaskLists: TaskList[] = [
   {
     title: '待办事项',
     tasks: [
@@ -147,7 +150,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/200?random=1',
         tags: ['设计', 'UI'],
         priority: 'high',
-        height: 280
+        height: 280,
       },
       {
         id: 2,
@@ -156,7 +159,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/350?random=2',
         tags: ['研究', '布局'],
         priority: 'medium',
-        height: 380
+        height: 380,
       },
       {
         id: 3,
@@ -165,7 +168,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/250?random=3',
         tags: ['会议', '演示'],
         priority: 'low',
-        height: 320
+        height: 320,
       },
       {
         id: 11,
@@ -174,7 +177,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/220?random=11',
         tags: ['学习', 'Vue3'],
         priority: 'medium',
-        height: 300
+        height: 300,
       },
       {
         id: 12,
@@ -183,7 +186,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/280?random=12',
         tags: ['CSS', '文档'],
         priority: 'low',
-        height: 340
+        height: 340,
       },
       {
         id: 13,
@@ -192,9 +195,9 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/260?random=13',
         tags: ['UI库', '组件'],
         priority: 'medium',
-        height: 320
-      }
-    ]
+        height: 320,
+      },
+    ],
   },
   {
     title: '进行中',
@@ -206,7 +209,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/280?random=4',
         tags: ['功能', '交互'],
         priority: 'medium',
-        height: 340
+        height: 340,
       },
       {
         id: 5,
@@ -215,7 +218,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/220?random=5',
         tags: ['移动端', '优化'],
         priority: 'high',
-        height: 300
+        height: 300,
       },
       {
         id: 14,
@@ -224,7 +227,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/240?random=14',
         tags: ['测试', '质量'],
         priority: 'high',
-        height: 310
+        height: 310,
       },
       {
         id: 15,
@@ -233,7 +236,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/260?random=15',
         tags: ['存储', '功能'],
         priority: 'medium',
-        height: 330
+        height: 330,
       },
       {
         id: 16,
@@ -242,9 +245,9 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/230?random=16',
         tags: ['主题', 'UI'],
         priority: 'low',
-        height: 290
-      }
-    ]
+        height: 290,
+      },
+    ],
   },
   {
     title: '已完成',
@@ -256,7 +259,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/240?random=6',
         tags: ['初始化', '配置'],
         priority: 'high',
-        height: 310
+        height: 310,
       },
       {
         id: 7,
@@ -265,7 +268,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/260?random=7',
         tags: ['设计', '数据'],
         priority: 'medium',
-        height: 320
+        height: 320,
       },
       {
         id: 8,
@@ -274,7 +277,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/230?random=8',
         tags: ['组件', '开发'],
         priority: 'medium',
-        height: 300
+        height: 300,
       },
       {
         id: 9,
@@ -283,7 +286,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/250?random=9',
         tags: ['路由', '配置'],
         priority: 'low',
-        height: 310
+        height: 310,
       },
       {
         id: 10,
@@ -292,9 +295,9 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/270?random=10',
         tags: ['UI库', '集成'],
         priority: 'high',
-        height: 330
-      }
-    ]
+        height: 330,
+      },
+    ],
   },
   {
     title: '待评审',
@@ -306,7 +309,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/240?random=17',
         tags: ['性能', '优化'],
         priority: 'high',
-        height: 310
+        height: 310,
       },
       {
         id: 18,
@@ -315,7 +318,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/220?random=18',
         tags: ['重构', '代码质量'],
         priority: 'medium',
-        height: 290
+        height: 290,
       },
       {
         id: 19,
@@ -324,7 +327,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/260?random=19',
         tags: ['动画', 'UI'],
         priority: 'low',
-        height: 320
+        height: 320,
       },
       {
         id: 20,
@@ -333,9 +336,9 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/230?random=20',
         tags: ['文档', '说明'],
         priority: 'medium',
-        height: 300
-      }
-    ]
+        height: 300,
+      },
+    ],
   },
   {
     title: '已归档',
@@ -347,7 +350,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/250?random=21',
         tags: ['需求', '分析'],
         priority: 'high',
-        height: 320
+        height: 320,
       },
       {
         id: 22,
@@ -356,7 +359,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/230?random=22',
         tags: ['技术', '决策'],
         priority: 'high',
-        height: 300
+        height: 300,
       },
       {
         id: 23,
@@ -365,7 +368,7 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/270?random=23',
         tags: ['设计', '原型'],
         priority: 'medium',
-        height: 330
+        height: 330,
       },
       {
         id: 24,
@@ -374,31 +377,64 @@ const taskLists = ref<TaskList[]>([
         image: 'https://picsum.photos/300/240?random=24',
         tags: ['计划', '管理'],
         priority: 'medium',
-        height: 310
-      }
-    ]
-  }
-])
+        height: 310,
+      },
+    ],
+  },
+]
 
-// 监听任务列表变化，重新布局瀑布流
-watch(taskLists, () => {
-  nextTick(() => {
-    taskLists.value.forEach((_, listIndex) => {
-      arrangeWaterfall(listIndex)
+// 从localStorage加载数据或使用默认数据
+const loadTaskListsFromStorage = (): TaskList[] => {
+  try {
+    const savedData = localStorage.getItem('kanban-task-lists')
+    if (savedData) {
+      return JSON.parse(savedData)
+    }
+  } catch (error) {
+    console.error('从本地存储加载数据失败:', error)
+    ElMessage.error('加载保存的数据失败，将使用默认数据')
+  }
+  return defaultTaskLists
+}
+
+// 保存数据到localStorage
+const saveTaskListsToStorage = () => {
+  try {
+    localStorage.setItem('kanban-task-lists', JSON.stringify(taskLists.value))
+  } catch (error) {
+    console.error('保存数据到本地存储失败:', error)
+    ElMessage.error('保存数据失败')
+  }
+}
+
+// 初始化任务列表数据
+const taskLists = ref<TaskList[]>(loadTaskListsFromStorage())
+
+// 监听任务列表变化，重新布局瀑布流并保存到localStorage
+watch(
+  taskLists,
+  () => {
+    nextTick(() => {
+      taskLists.value.forEach((_, listIndex) => {
+        arrangeWaterfall(listIndex)
+      })
+      // 保存数据到localStorage
+      saveTaskListsToStorage()
     })
-  })
-}, { deep: true })
+  },
+  { deep: true },
+)
 
 // 组件挂载后初始化瀑布流布局
 onMounted(() => {
   // 计算需要加载的图片总数
   totalImages.value = calculateTotalImages()
-  
+
   // 如果没有图片需要加载，直接关闭加载状态
   if (totalImages.value === 0) {
     isLoading.value = false
   }
-  
+
   nextTick(() => {
     taskLists.value.forEach((_, listIndex) => {
       arrangeWaterfall(listIndex)
@@ -410,44 +446,44 @@ onMounted(() => {
 const arrangeWaterfall = (listIndex: number) => {
   const container = document.getElementById(`waterfall-${listIndex}`)
   if (!container) return
-  
+
   const items = container.querySelectorAll('.waterfall-item')
   if (items.length === 0) return
-  
+
   // 重置所有卡片的位置
   items.forEach((item) => {
     const cardElement = item as HTMLElement
     cardElement.style.position = 'absolute'
     cardElement.style.transition = 'transform 0.3s ease, top 0.3s ease, left 0.3s ease'
   })
-  
+
   const containerWidth = container.clientWidth
   const columnCount = 2 // 两列
   const columnWidth = containerWidth / columnCount
   const columnGap = 12 // 列间距
-  
+
   // 检查所有图片是否加载完成
   const checkImagesLoaded = () => {
     const images = container.querySelectorAll('img')
     let allLoaded = true
-    
+
     // 如果没有图片，直接返回true
     if (images.length === 0) return true
-    
-    images.forEach(img => {
+
+    images.forEach((img) => {
       if (!img.complete) {
         allLoaded = false
       }
     })
-    
+
     return allLoaded
   }
-  
+
   // 如果图片未加载完成，等待所有图片加载后再布局
   if (!checkImagesLoaded()) {
     const images = container.querySelectorAll('img')
     let loadedCount = 0
-    
+
     const onImageLoad = () => {
       loadedCount++
       if (loadedCount === images.length) {
@@ -455,8 +491,8 @@ const arrangeWaterfall = (listIndex: number) => {
         performLayout()
       }
     }
-    
-    images.forEach(img => {
+
+    images.forEach((img) => {
       if (img.complete) {
         loadedCount++
       } else {
@@ -465,7 +501,7 @@ const arrangeWaterfall = (listIndex: number) => {
         img.addEventListener('error', onImageLoad)
       }
     })
-    
+
     // 如果所有图片已经加载完成，直接执行布局
     if (loadedCount === images.length) {
       performLayout()
@@ -474,27 +510,27 @@ const arrangeWaterfall = (listIndex: number) => {
     // 没有图片或所有图片已加载完成，直接执行布局
     performLayout()
   }
-  
+
   // 执行瀑布流布局
   function performLayout() {
     // 初始化每列的高度
     const columnHeights = Array(columnCount).fill(0)
-    
+
     // 为每个卡片分配位置
     items.forEach((item) => {
       const cardElement = item as HTMLElement
       // 找出最短的列
       const minHeightIndex = columnHeights.indexOf(Math.min(...columnHeights))
-      
+
       // 计算位置
-      const left = minHeightIndex * columnWidth + (minHeightIndex * columnGap / 2)
+      const left = minHeightIndex * columnWidth + (minHeightIndex * columnGap) / 2
       const top = columnHeights[minHeightIndex]
-      
+
       // 设置卡片位置
       cardElement.style.left = `${left}px`
       cardElement.style.top = `${top}px`
       cardElement.style.width = `${columnWidth - columnGap}px`
-      
+
       // 更新列高度
       columnHeights[minHeightIndex] += cardElement.clientHeight + 12 // 12px是卡片间的垂直间距
     })
@@ -509,14 +545,16 @@ const arrangeWaterfall = (listIndex: number) => {
 const onDragEnd = () => {
   ElMessage({
     type: 'success',
-    message: '任务已移动'
+    message: '任务已移动',
   })
-  
+
   // 重新布局瀑布流
   nextTick(() => {
     taskLists.value.forEach((_, listIndex) => {
       arrangeWaterfall(listIndex)
     })
+    // 保存数据到localStorage
+    saveTaskListsToStorage()
   })
 }
 
@@ -525,18 +563,22 @@ const addList = () => {
   ElMessageBox.prompt('请输入列表名称', '添加新列表', {
     confirmButtonText: '确认',
     cancelButtonText: '取消',
-  }).then(({ value }) => {
-    if (value) {
-      taskLists.value.push({
-        title: value,
-        tasks: []
-      })
-      ElMessage({
-        type: 'success',
-        message: `成功创建列表: ${value}`
-      })
-    }
-  }).catch(() => {})
+  })
+    .then(({ value }) => {
+      if (value) {
+        taskLists.value.push({
+          title: value,
+          tasks: [],
+        })
+        ElMessage({
+          type: 'success',
+          message: `成功创建列表: ${value}`,
+        })
+        // 保存数据到localStorage
+        saveTaskListsToStorage()
+      }
+    })
+    .catch(() => {})
 }
 
 // 任务详情对话框相关
@@ -555,7 +597,7 @@ const addTask = (listIndex: number) => {
     description: '',
     tags: [],
     priority: 'medium',
-    height: 0
+    height: 0,
   }
   isNewTask.value = true
   detailDialogVisible.value = true
@@ -577,16 +619,18 @@ const saveTask = (task: Task) => {
     taskLists.value[currentListIndex.value].tasks.push(task)
     ElMessage({
       type: 'success',
-      message: `成功添加任务: ${task.title}`
+      message: `成功添加任务: ${task.title}`,
     })
   } else {
     // 更新现有任务
     taskLists.value[currentListIndex.value].tasks[currentTaskIndex.value] = task
     ElMessage({
       type: 'success',
-      message: '任务已更新'
+      message: '任务已更新',
     })
   }
+  // 保存数据到localStorage
+  saveTaskListsToStorage()
 }
 
 // 删除任务
@@ -594,14 +638,18 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
   ElMessageBox.confirm('确定要删除这个任务吗?', '警告', {
     confirmButtonText: '确认',
     cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    taskLists.value[listIndex].tasks.splice(taskIndex, 1)
-    ElMessage({
-      type: 'success',
-      message: '任务已删除'
+    type: 'warning',
+  })
+    .then(() => {
+      taskLists.value[listIndex].tasks.splice(taskIndex, 1)
+      ElMessage({
+        type: 'success',
+        message: '任务已删除',
+      })
+      // 保存数据到localStorage
+      saveTaskListsToStorage()
     })
-  }).catch(() => {})
+    .catch(() => {})
 }
 </script>
 
@@ -673,8 +721,12 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .kanban-list {
@@ -701,7 +753,10 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
 /* 瀑布流卡片样式 */
 :deep(.waterfall-item) {
   position: absolute;
-  transition: transform 0.3s ease, top 0.3s ease, left 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    top 0.3s ease,
+    left 0.3s ease;
 }
 
 /* 空列表样式 */
@@ -736,4 +791,4 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
     max-width: 320px;
   }
 }
-</style> 
+</style>
