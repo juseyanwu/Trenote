@@ -32,33 +32,6 @@ const emit = defineEmits(['update:modelValue', 'end'])
 // 拖拽开始时存储相关信息
 let dragSourceElement: HTMLElement | null = null
 
-// 拖拽开始事件处理
-const onDragStart = (event: DragEvent, index: number, listId: string) => {
-  if (!event.dataTransfer) return
-
-  // 设置拖拽效果
-  event.dataTransfer.effectAllowed = 'move'
-
-  // 存储拖拽源信息
-  dragSourceElement = event.target as HTMLElement
-
-  // 设置拖拽数据
-  event.dataTransfer.setData(
-    'text/plain',
-    JSON.stringify({
-      index,
-      listId,
-      groupName: props.group.name,
-    }),
-  )
-
-  // 添加拖拽样式
-  setTimeout(() => {
-    if (dragSourceElement) {
-      dragSourceElement.classList.add('dragging')
-    }
-  }, 0)
-}
 
 // 拖拽经过目标区域事件处理
 const onDragOver = (event: DragEvent) => {
@@ -118,10 +91,6 @@ const onDrop = (event: DragEvent) => {
   }
 }
 
-// 暴露方法给父组件
-defineExpose({
-  onDragStart,
-})
 </script>
 
 <style scoped>

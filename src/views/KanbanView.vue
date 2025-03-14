@@ -53,6 +53,7 @@
                 @edit="editTask(listIndex, index)"
                 @delete="deleteTask(listIndex, index)"
                 @image-loaded="onTaskImageLoaded"
+                draggable="true"
                 @drag-start="
                   (event, listIndex, taskIndex) => onTaskDragStart(event, listIndex, taskIndex)
                 "
@@ -174,7 +175,7 @@ const arrangeWaterfall = (listIndex: number) => {
   items.forEach((item) => {
     const cardElement = item as HTMLElement
     cardElement.style.position = 'absolute'
-    cardElement.style.transition = 'transform 0.3s ease, top 0.3s ease, left 0.3s ease'
+    cardElement.style.transition = 'transform 0.5s ease, top 0.5s ease, left 0.5s ease'
   })
 
   const containerWidth = container.clientWidth

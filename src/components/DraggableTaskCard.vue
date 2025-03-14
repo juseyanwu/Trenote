@@ -1,7 +1,6 @@
 <template>
   <div
     class="task-card bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 waterfall-item"
-    draggable="true"
     @dragstart="onDragStart"
     @dragend="onDragEnd"
   >
@@ -177,16 +176,14 @@ const onDragStart = (event: DragEvent) => {
 
   // 添加拖拽样式
   const element = event.target as HTMLElement
-  setTimeout(() => {
-    element.classList.add('chosen-card')
-  }, 0)
+  element.classList.add('chosen-card')
 
   // 触发拖拽开始事件
   emit('drag-start', event, props.listIndex, props.taskIndex)
 }
 
 // 拖拽结束事件
-const onDragEnd = () => {
+const onDragEnd = (event: DragEvent) => {
   const element = event?.target as HTMLElement
   if (element) {
     element.classList.remove('chosen-card')
