@@ -4,11 +4,67 @@
 
 :root {
   --el-color-primary: #409eff;
+  --bg-color: #f5f7fa;
+  --text-color: #303133;
+  --border-color: #e4e7ed;
+  --card-bg: #ffffff;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --transition-duration: 0.3s;
+}
+
+html.dark {
+  --el-color-primary: #9a9898;
+  --bg-color: #1a1a1a;
+  --text-color: #e5eaf3;
+  --border-color: #4c4d4f;
+  --card-bg: #252525;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+
+  /* Element Plus 组件暗色模式变量覆盖 */
+  --el-button-bg-color: #2b2b2b;
+  --el-button-text-color: #e5eaf3;
+  --el-button-border-color: #4c4d4f;
+  --el-button-hover-bg-color: #363636;
+  --el-button-hover-text-color: #ffffff;
+
+  --el-tag-bg-color: #2b2b2b;
+  --el-tag-border-color: #4c4d4f;
+  --el-tag-text-color: #e5eaf3;
+  --el-tag-hover-color: #363636;
+
+  --el-fill-color-blank: #252525;
+  --el-bg-color: #252525;
+  --el-bg-color-overlay: #2b2b2b;
+
+  --el-text-color-primary: #e5eaf3;
+  --el-text-color-regular: #c0c4cc;
+  --el-text-color-secondary: #a3a6ad;
+
+  --el-border-color: #4c4d4f;
+  --el-border-color-light: #4c4d4f;
+  --el-border-color-lighter: #363636;
+
+  --el-fill-color: #2b2b2b;
+  --el-fill-color-light: #363636;
+  --el-fill-color-lighter: #404040;
+
+  --el-disabled-bg-color: #252525;
+  --el-disabled-text-color: #7c7c7c;
+  --el-disabled-border-color: #4c4d4f;
+
+  --el-overlay-color: rgba(0, 0, 0, 0.8);
+  --el-mask-color: rgba(0, 0, 0, 0.8);
+
+  --el-box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3);
+  --el-box-shadow-light: 0 2px 8px 0 rgba(0, 0, 0, 0.3);
 }
 
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
+  transition:
+    background-color var(--transition-duration),
+    color var(--transition-duration);
 }
 
 /* 自定义滚动条样式 */
@@ -18,7 +74,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--bg-color);
   border-radius: 3px;
 }
 
@@ -29,4 +85,11 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+/* 暗黑模式过渡效果 */
+* {
+  transition:
+    background-color var(--transition-duration),
+    border-color var(--transition-duration);
 }

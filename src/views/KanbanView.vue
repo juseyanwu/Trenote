@@ -3,7 +3,9 @@
     <!-- 全局加载状态 -->
     <div v-if="isLoading" class="global-loading-overlay">
       <div class="loading-content">
-        <el-icon class="loading-icon"><Loading /></el-icon>
+        <el-icon class="loading-icon">
+          <Loading />
+        </el-icon>
         <div class="loading-text">正在加载任务列表...</div>
 
         <!-- 加载进度条 -->
@@ -18,48 +20,31 @@
 
     <div class="flex overflow-x-auto pb-4 pt-2 px-2 gap-8">
       <!-- 任务列表容器 -->
-      <div
-        v-for="(list, listIndex) in taskLists"
-        :key="listIndex"
-        class="kanban-list bg-gray-100 rounded-lg shadow-md flex-shrink-0"
-      >
+      <div v-for="(list, listIndex) in taskLists" :key="listIndex"
+        class="kanban-list bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md flex-shrink-0">
         <!-- 列表标题 -->
 
-        <div class="list-header p-4 border-b border-gray-200 flex justify-between items-center">
-          <h3 class="font-semibold text-gray-700 text-lg">
-            {{ list.title }} <span class="text-sm text-gray-500">({{ list.tasks.length }})</span>
+        <div class="list-header p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+          <h3 class="font-semibold text-gray-700 dark:text-gray-200 text-lg">
+            {{ list.title }} <span class="text-sm text-gray-500 dark:text-gray-400">({{ list.tasks.length }})</span>
           </h3>
           <el-button type="primary" size="small" circle @click="addTask(listIndex)">
-            <el-icon><Plus /></el-icon>
+            <el-icon>
+              <Plus />
+            </el-icon>
           </el-button>
         </div>
 
         <!-- 瀑布流任务卡片容器 -->
         <div class="waterfall-container p-4 max-h-[calc(100vh-180px)] overflow-y-auto">
           <div class="waterfall-wrapper" :id="`waterfall-${listIndex}`">
-            <DraggableContainer
-              v-model="list.tasks"
-              :group="{ name: 'tasks', pull: true, put: true }"
-              :data-list-id="listIndex.toString()"
-              @end="onDragEnd"
-              :class="['min-h-[calc(100vh-250px)]', { 'empty-list': list.tasks.length === 0 }]"
-            >
-              <DraggableTaskCard
-                v-for="(task, index) in list.tasks"
-                :key="task.id"
-                :task="task"
-                :list-index="listIndex"
-                :task-index="index"
-                @edit="editTask(listIndex, index)"
-                @delete="deleteTask(listIndex, index)"
-                @image-loaded="onTaskImageLoaded"
-                draggable="true"
-                @drag-start="
-                  (event, listIndex, taskIndex) => onTaskDragStart(event, listIndex, taskIndex)
-                "
-                @drag-end="onTaskDragEnd"
-                class="waterfall-item"
-              />
+            <DraggableContainer v-model="list.tasks" :group="{ name: 'tasks', pull: true, put: true }"
+              :data-list-id="listIndex.toString()" @end="onDragEnd"
+              :class="['min-h-[calc(100vh-250px)]', { 'empty-list': list.tasks.length === 0 }]">
+              <DraggableTaskCard v-for="(task, index) in list.tasks" :key="task.id" :task="task" :list-index="listIndex"
+                :task-index="index" @edit="editTask(listIndex, index)" @delete="deleteTask(listIndex, index)"
+                @image-loaded="onTaskImageLoaded" draggable="true" @drag-start="(event, listIndex, taskIndex) => onTaskDragStart(event, listIndex, taskIndex)
+      " @drag-end="onTaskDragEnd" class="waterfall-item" />
             </DraggableContainer>
           </div>
         </div>
@@ -68,19 +53,17 @@
       <!-- 添加新列表按钮 -->
       <div class="add-list-btn flex-shrink-0" style="width: 380px">
         <el-button type="primary" plain class="w-full" @click="addList">
-          <el-icon class="mr-2"><Plus /></el-icon>添加新列表
+          <el-icon class="mr-2">
+            <Plus />
+          </el-icon>添加新列表
         </el-button>
       </div>
     </div>
   </div>
 
   <!-- 任务详情对话框 -->
-  <TaskDetailDialog
-    v-model:visible="detailDialogVisible"
-    :task="currentTask"
-    :is-new-task="isNewTask"
-    @save="saveTask"
-  />
+  <TaskDetailDialog v-model:visible="detailDialogVisible" :task="currentTask" :is-new-task="isNewTask"
+    @save="saveTask" />
 </template>
 
 <script setup lang="ts">
@@ -321,7 +304,7 @@ const addList = () => {
         })
       }
     })
-    .catch(() => {})
+    .catch(() => { })
 }
 
 // 任务详情对话框相关
@@ -390,7 +373,7 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
       })
       // Pinia store已经处理了数据持久化，不需要再调用saveTaskListsToStorage
     })
-    .catch(() => {})
+    .catch(() => { })
 }
 </script>
 
@@ -415,14 +398,18 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
   backdrop-filter: blur(3px);
 }
 
+.dark .global-loading-overlay {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
 .loading-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: white;
+  background-color: var(--card-bg);
   padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px var(--shadow-color);
   min-width: 300px;
 }
 
@@ -435,7 +422,7 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
 
 .loading-text {
   font-size: 16px;
-  color: #606266;
+  color: var(--text-color);
   margin-bottom: 20px;
 }
 
@@ -446,6 +433,10 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 8px;
+}
+
+.dark .progress-container {
+  background-color: #3a3a3a;
 }
 
 .progress-bar {
@@ -461,10 +452,15 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
   font-weight: 500;
 }
 
+.dark .progress-text {
+  color: #a0a0a0;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -515,6 +511,11 @@ const deleteTask = (listIndex: number, taskIndex: number) => {
 .ghost-card {
   opacity: 0.5;
   background: #c8ebfb;
+  border: 1px dashed #409eff;
+}
+
+.dark .ghost-card {
+  background: #2a4b5f;
   border: 1px dashed #409eff;
 }
 

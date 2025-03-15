@@ -1,46 +1,31 @@
 <template>
   <div
-    class="task-card bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 waterfall-item"
-    @dragstart="onDragStart"
-    @dragend="onDragEnd"
-  >
+    class="task-card bg-white dark:bg-gray-700 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 waterfall-item"
+    @dragstart="onDragStart" @dragend="onDragEnd">
     <!-- 卡片图片 -->
     <div v-if="task.image" :class="`card-image card-image-${task.id}`" :style="imageContainerStyle">
-      <div
-        v-if="!imageLoaded"
-        class="image-placeholder bg-gray-200 flex items-center justify-center"
-      >
-        <el-icon class="text-gray-400 text-xl"><Picture /></el-icon>
+      <div v-if="!imageLoaded" class="image-placeholder bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+        <el-icon class="text-gray-400 text-xl">
+          <Picture />
+        </el-icon>
       </div>
-      <img
-        :src="task.image"
-        :alt="task.title"
-        class="w-full object-cover"
-        @load="onImageLoad"
-        @error="onImageError"
-        :style="imageLoaded ? '' : 'display: none;'"
-      />
+      <img :src="task.image" :alt="task.title" class="w-full object-cover" @load="onImageLoad" @error="onImageError"
+        :style="imageLoaded ? '' : 'display: none;'" />
     </div>
 
     <!-- 卡片内容 -->
     <div class="card-content p-4">
       <!-- 标题 -->
-      <h4 class="text-base font-medium text-gray-800 mb-3 line-clamp-2">{{ task.title }}</h4>
+      <h4 class="text-base font-medium text-gray-800 dark:text-gray-100 mb-3 line-clamp-2">{{ task.title }}</h4>
 
       <!-- 描述 -->
-      <p v-if="task.description" class="text-sm text-gray-600 mb-3 line-clamp-3">
+      <p v-if="task.description" class="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-3">
         {{ task.description }}
       </p>
 
       <!-- 标签 -->
       <div v-if="task.tags && task.tags.length" class="tags-container flex flex-wrap gap-1 mb-3">
-        <el-tag
-          v-for="(tag, index) in task.tags"
-          :key="index"
-          size="small"
-          effect="plain"
-          class="text-xs"
-        >
+        <el-tag v-for="(tag, index) in task.tags" :key="index" size="small" effect="plain" class="text-xs">
           {{ tag }}
         </el-tag>
       </div>
@@ -57,10 +42,14 @@
         <!-- 操作按钮 -->
         <div class="action-buttons flex">
           <el-button type="primary" size="small" circle plain @click.stop="$emit('edit')">
-            <el-icon><Edit /></el-icon>
+            <el-icon>
+              <Edit />
+            </el-icon>
           </el-button>
           <el-button type="danger" size="small" circle plain @click.stop="$emit('delete')">
-            <el-icon><Delete /></el-icon>
+            <el-icon>
+              <Delete />
+            </el-icon>
           </el-button>
         </div>
       </div>
@@ -212,8 +201,8 @@ onMounted(() => {
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 12px;
-  background-color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background-color: var(--card-bg);
+  box-shadow: 0 2px 8px var(--shadow-color);
   cursor: grab;
 }
 
@@ -234,8 +223,10 @@ onMounted(() => {
   object-fit: cover;
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
-  pointer-events: none; /* 禁用图片的鼠标事件，确保拖拽事件由父元素处理 */
-  user-select: none; /* 防止图片被选中 */
+  pointer-events: none;
+  /* 禁用图片的鼠标事件，确保拖拽事件由父元素处理 */
+  user-select: none;
+  /* 防止图片被选中 */
 }
 
 .image-placeholder {
