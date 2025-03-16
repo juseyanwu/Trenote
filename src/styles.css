@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --el-color-primary: #409eff;
+  --el-color-primary: #3e3f3f;
   --bg-color: #f5f7fa;
   --text-color: #303133;
   --border-color: #e4e7ed;
@@ -12,8 +12,20 @@
   --transition-duration: 0.3s;
 }
 
+html {
+  --el-color-primary: #191919 !important;
+}
+.el-button:hover {
+  background-color: #cacaca !important;
+  border-color: #ffffff;
+}
+
+.el-button--primary.is-plain {
+  --el-button-bg-color: #b2b2b2!important;
+  --el-button-border-color: #ffffff!important;
+}
 html.dark {
-  --el-color-primary: #9a9898;
+  --el-color-primary: #9a9898 !important;
   --bg-color: #1a1a1a;
   --text-color: #e5eaf3;
   --border-color: #4c4d4f;
